@@ -1,0 +1,86 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DANZZ ID CHECKER</title><style>
+*{box-sizing:border-box}body{margin:0;background:#050505;color:#eee;font-family:Arial,sans-serif}.wrap{max-width:1150px;margin:auto;padding:20px 15px 60px}.hero{text-align:center;padding:28px 5px}.hero h1{margin:0;color:#39ff88;text-shadow:0 0 8px #39ff88,0 0 28px #0a5;font-size:clamp(30px,7vw,58px)}.hero p{color:#999}.card{background:#0d0d0d;border:1px solid #252525;border-radius:18px;padding:20px;margin:15px 0;box-shadow:0 0 25px #000}.login{min-height:100vh;display:grid;place-items:center}.loginbox{width:min(430px,94vw);text-align:center;background:#0d0d0d;border:1px solid #234d32;border-radius:20px;padding:25px;box-shadow:0 0 30px #000}.logo{width:70px;height:70px;margin:auto;display:grid;place-items:center;background:#39ff88;color:#001b0b;border-radius:20px;font-weight:900;font-size:25px;box-shadow:0 0 15px #39ff88,0 0 50px #0a5}input,select{width:100%;padding:13px;background:#080808;color:#fff;border:1px solid #333;border-radius:10px;margin:5px 0 12px}button{padding:12px 17px;border:0;border-radius:10px;background:#20d86b;color:#001b0b;font-weight:800;cursor:pointer;margin:4px}button.secondary{background:#151515;color:#39ff88;border:1px solid #285f40}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}label{display:block;color:#bbb;font-weight:bold;margin-bottom:7px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}.check{display:flex;align-items:center;gap:8px}.check input{width:auto}.muted{color:#888;font-size:13px}.log,pre{white-space:pre-wrap;background:#050505;border:1px solid #222;border-radius:12px;padding:14px;overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid #222}th{color:#39ff88}.fileitem{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;padding:10px 0;gap:10px}.stat b{color:#39ff88}.warn{color:#ffc857}.msg{min-height:18px;color:#ff7890;font-size:13px}.accountbar{display:flex;justify-content:space-between;gap:10px;align-items:center}.featurelist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.feature{border:1px solid #1d3425;border-radius:13px;padding:14px;background:#09100b}.feature b{color:#39ff88}.expired{text-align:center;color:#ff8196}.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.hidden{display:none!important}</style></head><body>
+<div id="loginPage" class="login"><div class="loginbox"><div class="logo">DZ</div><h2>WELCOME TO DANZZ ID CHECKER</h2><p class="muted">Masukkan Access Key Website</p><form id="customerLogin"><input id="accessKey" placeholder="DANZZGANTENG_KYT_XXXXXXXX" autocomplete="off" autocapitalize="characters" required><button style="width:100%">🔐 VERIFY KEY</button></form><div id="loginMsg" class="msg"></div></div></div>
+<div id="site" class="wrap hidden"><div class="topbar"><div><div style="font-size:24px;font-weight:900;color:#39ff88">DANZZ ID CHECKER</div><div id="welcome" class="muted"></div></div><button id="logout" class="secondary">LOGOUT</button></div><div id="featureArea" class="card"><h2>⚡ ACTIVE FEATURES</h2><div id="featureList" class="featurelist"></div></div>
+<div class="hero"><h1>WELCOME TO WEBSITE<br>DANZZ ID CHECKER</h1><p>Distribution & Flexible Device ID Splitter</p></div>
+<div class="card"><div class="grid"><div><label>Upload TXT</label><input id="file" type="file" accept=".txt"></div><div><label>Mode Split</label><select id="mode"><option value="full">FULL INFO / ORIGINAL LINE</option><option value="id">DEVICE ID ONLY</option></select></div><div><label>Jumlah ID / record per file</label><input id="size" type="number" min="1" max="100000" value="100"></div></div><div class="row"><label class="check"><input id="shuffle" type="checkbox" checked> Acak / mix sebelum split</label></div><div class="row"><button id="split">✂️ SPLIT FILE</button><button id="zip" class="secondary" disabled>📦 DOWNLOAD ZIP</button><button class="secondary" onclick="location.reload()">RESET</button></div></div>
+<div class="card"><div class="stat">Total record/ID: <b id="total">0</b> | Total file: <b id="parts">0</b></div><div id="log" class="log">Upload TXT untuk mulai.</div></div><div class="card"><h2>📊 SKIN DISTRIBUTION</h2><div id="dist" class="muted">Hanya tersedia jika input berisi Skin Count.</div></div><div class="card"><h2>📈 SKIN COUNT SUMMARY</h2><div id="summary" class="log">Belum ada data.</div></div><div class="card"><h2>🔢 SKIN COUNTS (LOWEST → HIGHEST)</h2><pre id="sorted">Belum ada data.</pre></div><div class="card"><h2>🏆 COLLECTOR TIERS</h2><pre id="tiers">Belum ada data.</pre></div><div class="card"><h2>📋 DISTRIBUTION TXT</h2><div class="row"><button class="secondary" id="copy">📋 COPY TXT</button><button class="secondary" id="select">SELECT ALL</button></div><pre id="txt">Belum ada data.</pre></div><div class="card"><h2>📦 HASIL SPLIT</h2><div id="results" class="muted">Belum ada hasil.</div></div></div>
+<script>
+const SUPABASE_URL="https://rdgtbyayaudumzpxfcax.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_OZOiy7jXy1pcgA-fZfW1SQ_3eRoQaQv";
+let current=null,items=[],outputs=[],distText='';
+const configured=()=>SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('PASTE_')&&!SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
+async function supaFetch(path,options={},timeout=10000){
+  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
+  try{
+    const r=await fetch(SUPABASE_URL+path,{
+      ...options,
+      signal:ctrl.signal,
+      headers:{
+        apikey:SUPABASE_PUBLISHABLE_KEY,
+        Authorization:'Bearer '+SUPABASE_PUBLISHABLE_KEY,
+        ...(options.headers||{})
+      }
+    });
+    const text=await r.text();
+    let data=null; try{data=text?JSON.parse(text):null}catch(_){}
+    if(!r.ok) throw new Error(data?.message||data?.error_description||text||('HTTP '+r.status));
+    return data;
+  }finally{clearTimeout(timer)}
+}
+const sb={
+  rpc:async(name,params)=>({data:await supaFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params||{})})}),
+  from:(table)=>({
+    select:()=>({
+      eq:(col,val)=>({
+        order:async(orderCol,opts)=>({data:await supaFetch('/rest/v1/'+table+'?select=*&'+encodeURIComponent(col)+'=eq.'+encodeURIComponent(val)+'&order='+encodeURIComponent(orderCol)+'.'+(opts?.ascending===false?'desc':'asc'))})
+      })
+    })
+  })
+};
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function normalize(s){return s.replace(/^\uFEFF/,'').replace(/\r/g,'')}function isDeviceId(s){return /^and_[A-Za-z0-9-]+$/i.test(s.trim())}function extractId(line){let s=line.trim();if(s.includes('|')){let first=s.split('|')[0].trim();if(isDeviceId(first))return first}let m=s.match(/^Device\s*id\s*:\s*(?:\n\s*)?(and_[A-Za-z0-9-]+)/i);if(m)return m[1];if(isDeviceId(s))return s;return ''}
+function parseInput(text){text=normalize(text);const lines=text.split('\n'),starts=[];for(let i=0;i<lines.length;i++)if(lines[i].trim().toUpperCase()==='VALID HIT')starts.push(i);if(starts.length){const out=[];for(let i=0;i<starts.length;i++){const a=starts[i],b=i+1<starts.length?starts[i+1]:lines.length,raw=lines.slice(a,b).join('\n').trim(),id=extractId(raw)||((raw.match(/Device\s*id\s*:\s*\n?\s*(and_[A-Za-z0-9-]+)/i)||[])[1]||'');out.push({raw:raw+'\n',id,skin:getSkin(raw),tier:getTier(raw)})}return out.filter(x=>x.id)}return lines.map(x=>x.trim()).filter(Boolean).map(line=>({raw:line+'\n',id:extractId(line),skin:null,tier:null})).filter(x=>x.id)}function getSkin(raw){let m=raw.match(/(?:^|\n)\s*Skin\s*Count\s*:\s*([0-9]+)/i);return m?Number(m[1]):null}function getTier(raw){let m=raw.match(/(?:^|\n)\s*Collector\s*Tier\s*:\s*([^\n]+)/i);return m?m[1].trim():'Unknown'}function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}function download(name,data){const b=new Blob([data],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function buildDistribution(){const have=items.filter(x=>x.skin!==null);if(!have.length){$('dist').innerHTML='<span class="warn">N/A — input ini tidak mempunyai Skin Count. Fitur split tetap bisa digunakan.</span>';$('summary').textContent='Skin Count tidak tersedia pada input.';$('sorted').textContent='N/A';$('tiers').textContent='N/A';$('txt').textContent='=== SKIN DISTRIBUTION ===\nN/A — Skin Count tidak tersedia.';distText=$('txt').textContent;return}const v=have.map(x=>x.skin),total=v.length,sum=v.reduce((a,b)=>a+b,0),ranges=[['0',0,0],['1–99',1,99],['100–199',100,199],['200–249',200,249],['250–299',250,299],['300–349',300,349],['350–399',350,399],['400–449',400,449],['450–499',450,499],['500–549',500,549],['550–599',550,599],['600–649',600,649],['650+',650,Infinity]],rows=[['Range','Count','Percentage']];for(const r of ranges){let n=v.filter(x=>x>=r[1]&&x<=r[2]).length;rows.push([r[0],n,(n/total*100).toFixed(2)+'%'])}$('dist').innerHTML='<table><tr><th>Range</th><th>Count</th><th>Percentage</th></tr>'+rows.slice(1).map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table>';const srt=v.slice().sort((a,b)=>a-b),unique=[...new Set(srt)],sumtxt='Lowest Skin Count : '+srt[0]+'\nHighest Skin Count: '+srt.at(-1)+'\nTotal Skin Count  : '+sum.toLocaleString('id-ID')+'\nAverage Skin Count: '+(sum/total).toFixed(2)+'\nUnique Skin Counts: '+unique.length+'\nSkin >= 300      : '+v.filter(x=>x>=300).length+'\nSkin >= 400      : '+v.filter(x=>x>=400).length+'\nSkin >= 500      : '+v.filter(x=>x>=500).length;$('summary').textContent=sumtxt;$('sorted').textContent=srt.join('\n');let map={};have.forEach(x=>map[x.tier]=(map[x.tier]||0)+1);let ts=Object.entries(map).sort((a,b)=>b[1]-a[1]);$('tiers').textContent=ts.map(x=>x[0]+' : '+x[1]).join('\n');distText='=== SKIN DISTRIBUTION ===\nRange\tCount\tPercentage\n'+rows.slice(1).map(r=>r.join('\t')).join('\n')+'\n\n=== SKIN COUNT SUMMARY ===\n'+sumtxt+'\n\n=== SKIN COUNTS (LOWEST -> HIGHEST) ===\n'+srt.join('\n')+'\n\n=== COLLECTOR TIERS ===\n'+ts.map(x=>x[0]+' : '+x[1]).join('\n');$('txt').textContent=distText}
+function render(){const box=$('results');box.innerHTML='';outputs.forEach(o=>{let d=document.createElement('div');d.className='fileitem';d.innerHTML='<span><b>'+o.name+'</b><br><span class="muted">'+o.count+' record/ID</span></span>';let b=document.createElement('button');b.textContent='DOWNLOAD';b.onclick=()=>download(o.name,o.data);d.appendChild(b);box.appendChild(d)})}
+async function loadFeatures(){let data=[];try{data=(await sb.from('website_features').select('*').eq('enabled',true).order('sort_order',{ascending:true})).data||[]}catch(e){data=[]}const list=data||[];$('featureList').innerHTML=list.length?list.map(f=>'<div class="feature"><div style="font-size:24px">'+(f.icon||'🧩')+'</div><b>'+String(f.name).replace(/</g,'&lt;')+'</b><div class="muted">'+String(f.description||'').replace(/</g,'&lt;')+'</div></div>').join(''):'<div class="muted">Tidak ada feature aktif.</div>'}
+async function verifyKey(){
+  const key=$('accessKey').value.trim().toUpperCase();
+  $('loginMsg').textContent='Memverifikasi Access Key...';
+  if(!configured()){$('loginMsg').textContent='Supabase URL + Publishable Key belum diisi.';return false}
+  
+  const {data,error}=await sb.rpc('customer_key_login',{p_access_key:key});
+  if(error){$('loginMsg').textContent='Gagal memverifikasi key: '+error.message;return false}
+  const c=Array.isArray(data)?data[0]:data;
+  if(!c){$('loginMsg').textContent='Access Key tidak valid, expired, atau dinonaktifkan.';return false}
+  current=c;
+  $('loginPage').classList.add('hidden');
+  $('site').classList.remove('hidden');
+  $('welcome').textContent='Akses: '+(c.display_name||c.username||'Customer')+' • '+(c.is_permanent?'PERMANEN':'Aktif sampai '+new Date(c.expires_at).toLocaleString('id-ID'));
+  await loadFeatures();
+  startAccessGuard();
+  return true;
+}
+$('customerLogin').onsubmit=async e=>{e.preventDefault();await verifyKey()};
+$('logout').onclick=()=>location.reload();
+
+let accessGuardTimer=null;
+async function checkAccessStillValid(){
+  if(!current?.access_key)return;
+  const {data,error}=await sb.rpc('customer_key_login',{p_access_key:current.access_key});
+  if(error||!data?.length){
+    clearInterval(accessGuardTimer);
+    current=null;
+    $('site').classList.add('hidden');
+    $('loginPage').classList.remove('hidden');
+    $('accessKey').value='';
+    $('loginMsg').textContent='🔒 Access Key sudah expired / dinonaktifkan. Silakan gunakan key yang masih aktif.';
+  }
+}
+function startAccessGuard(){
+  clearInterval(accessGuardTimer);
+  accessGuardTimer=setInterval(checkAccessStillValid,15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkAccessStillValid()},{once:false});
+}
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;items=parseInput(await f.text());outputs=[];render();$('total').textContent=items.length.toLocaleString('id-ID');$('parts').textContent='0';$('log').textContent=items.length?'Berhasil membaca '+items.length.toLocaleString('id-ID')+' Device ID/record. Format terdeteksi otomatis.':'Tidak menemukan Device ID yang valid.';buildDistribution();$('zip').disabled=true};$('split').onclick=()=>{if(!items.length)return alert('Upload TXT terlebih dahulu.');let n=Number($('size').value);if(!Number.isInteger(n)||n<1||n>100000)return alert('Jumlah per file harus 1 sampai 100000.');let a=items.slice();if($('shuffle').checked)shuffle(a);outputs=[];const mode=$('mode').value;for(let i=0;i<a.length;i+=n){const c=a.slice(i,i+n),data=mode==='full'?c.map(x=>x.raw.trimEnd()).join('\n\n')+'\n':c.map(x=>x.id).join('\n')+'\n';outputs.push({name:'split_devid_part'+String(outputs.length+1).padStart(2,'0')+'.txt',data,count:c.length})}$('parts').textContent=outputs.length.toLocaleString('id-ID');$('log').textContent='Selesai! '+a.length.toLocaleString('id-ID')+' record/ID → '+outputs.length.toLocaleString('id-ID')+' file.';render();$('zip').disabled=false};$('copy').onclick=async()=>{if(!distText)return;try{await navigator.clipboard.writeText(distText);alert('Distribution TXT sudah dicopy.')}catch(e){alert('Copy gagal, gunakan SELECT ALL.')}};$('select').onclick=()=>{const r=document.createRange();r.selectNodeContents($('txt'));const s=getSelection();s.removeAllRanges();s.addRange(r)};$('zip').onclick=()=>{if(!outputs.length)return;if(window.JSZip)makeZip();else{let s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=makeZip;s.onerror=()=>alert('ZIP library gagal dimuat.');document.head.appendChild(s)}};async function makeZip(){const z=new JSZip();outputs.forEach(o=>z.file(o.name,o.data));const b=await z.generateAsync({type:'blob'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='danzz_split_devid.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+</script></body></html>

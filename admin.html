@@ -1,0 +1,185 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DANZZ ADMIN PANEL v3</title>
+<style>
+:root{--g:#39ff88;--bg:#050705;--panel:#0b110d;--line:#193021;--muted:#8b9b91;--red:#ff5570}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#12351f 0,#050705 40%);color:#eee;font-family:Arial,sans-serif}.hidden{display:none!important}.wrap{max-width:1200px;margin:auto;padding:20px}.login{min-height:100vh;display:grid;place-items:center}.loginbox,.panel,.stat{background:rgba(8,14,10,.94);border:1px solid var(--line);border-radius:20px;box-shadow:0 0 35px #000;padding:22px}.loginbox{width:min(430px,94vw);text-align:center}.logo{width:75px;height:75px;margin:0 auto 15px;border-radius:22px;display:grid;place-items:center;font-weight:900;font-size:27px;color:#001b0b;background:var(--g);box-shadow:0 0 15px var(--g),0 0 60px #0a5}.api{display:inline-flex;align-items:center;gap:8px;margin:12px 0;color:var(--g);font-size:13px}.dot{width:9px;height:9px;background:var(--g);border-radius:50%;box-shadow:0 0 8px var(--g);animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border-radius:10px;border:1px solid #26392d;background:#050806;color:#fff}button{border:0;border-radius:10px;padding:11px 15px;background:var(--g);color:#001b0b;font-weight:800;cursor:pointer}button.alt{background:#101812;color:var(--g);border:1px solid #28563a}button.danger{background:#33121a;color:#ff9aaa;border:1px solid #7a293b}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-size:24px;font-weight:900;color:var(--g);text-shadow:0 0 12px #0a5}.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}.nav button.active{box-shadow:0 0 15px #174d2c}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.stat small{color:var(--muted)}.num{font-size:27px;font-weight:900;color:var(--g);margin-top:6px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid #17251c;text-align:left;white-space:nowrap}.table th{color:var(--g)}.badge{padding:5px 9px;border-radius:999px;border:1px solid #28633f;color:var(--g);font-size:12px}.badge.off,.badge.exp{color:#ff8799;border-color:#7a293b}.badge.soon{color:#ffd36e;border-color:#725d28}.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:15px;z-index:5}.modalbox{width:min(650px,96vw);max-height:92vh;overflow:auto;background:#09100b;border:1px solid var(--line);border-radius:18px;padding:20px}.msg{min-height:18px;color:#ff8799;font-size:13px;margin:4px 0 8px}.ok{color:var(--g)}h2,h3{margin-top:0}.note{color:var(--muted);font-size:13px;line-height:1.6}.feature{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #17251c}.icon{font-size:25px;width:35px}.feature .grow{flex:1}.actions{display:flex;gap:5px;flex-wrap:wrap}
+</style></head><body>
+<div id="login" class="login"><div class="loginbox"><div class="logo">DZ</div><h2>DANZZ ADMIN PANEL</h2><div class="api"><span class="dot"></span><span id="apiText">API CHECKING...</span></div><form id="loginForm"><input id="email" type="email" placeholder="Admin email" required><input id="password" type="password" placeholder="Admin password" required><button style="width:100%">LOGIN</button></form><div id="loginMsg" class="msg"></div></div></div>
+<div id="app" class="wrap hidden"><div class="top"><div><div class="brand">DANZZ CONTROL CENTER</div><div class="note">Customer + Access Key + Feature Management</div></div><button class="alt" id="logout">LOGOUT</button></div>
+<div class="nav"><button data-tab="dash" class="active">DASHBOARD</button><button data-tab="customers">CUSTOMERS</button><button data-tab="features">FEATURES</button></div>
+<section id="dash"><div class="stats"><div class="stat"><small>CUSTOMERS</small><div id="sTotal" class="num">0</div></div><div class="stat"><small>ACTIVE</small><div id="sActive" class="num">0</div></div><div class="stat"><small>EXPIRING ≤ 3 DAYS</small><div id="sSoon" class="num">0</div></div><div class="stat"><small>EXPIRED</small><div id="sExpired" class="num">0</div></div><div class="stat"><small>FEATURES</small><div id="sFeatures" class="num">0</div></div></div>
+<div class="panel" style="margin-top:15px"><h3>🌐 WEBSITE CHECKER</h3>
+<p class="note">Masukkan URL website checker yang sudah kamu deploy. URL ini tetap sama untuk semua customer; yang berubah hanya Access Key.</p>
+<input id="siteUrl" type="url" placeholder="https://website-kamu.vercel.app">
+<div class="toolbar"><button id="saveSite">💾 SAVE WEBSITE URL</button><span id="siteMsg" class="msg"></span></div></div>
+<div class="panel" style="margin-top:15px"><h3>API STATUS</h3><div class="api"><span class="dot"></span><span id="dashApi">Supabase API online</span></div><p class="note">Akun customer, key, harga, dan fitur tersimpan di Supabase.</p></div></section>
+<section id="customers" class="hidden"><div class="panel"><div class="toolbar"><h3 style="margin:0;flex:1">CUSTOMER ACCOUNTS</h3><button id="addCustomer">+ CREATE ACCOUNT</button><button class="alt" id="refreshCustomers">REFRESH</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Access Key</th><th>Username</th><th>Plan</th><th>Harga</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead><tbody id="customerRows"></tbody></table></div></div></section>
+<section id="features" class="hidden"><div class="panel"><div class="toolbar"><h3 style="margin:0;flex:1">FEATURE MANAGER</h3><button id="addFeature">+ ADD FEATURE</button><button class="alt" id="refreshFeatures">REFRESH</button></div><div id="featureRows"></div></div></section>
+</div>
+<div id="customerModal" class="modal hidden"><div class="modalbox"><h3 id="cmTitle">CREATE ACCESS KEY</h3>
+<form id="customerForm"><input id="cid" type="hidden">
+<label>Username / Label Customer</label><input id="cuser" placeholder="contoh: danzz01">
+<div class="note">Username hanya sebagai identitas admin. Customer login menggunakan Access Key.</div>
+<div class="grid">
+<div><label>Nama</label><input id="cname" placeholder="Nama customer"></div>
+<div><label>Kontak</label><input id="ccontact" placeholder="Telegram / WhatsApp"></div>
+</div>
+<div class="grid">
+<div><label>Paket VIP</label><select id="cplan">
+<option value="1 hari" data-days="1" data-price="10000">1 HARI — Rp10.000</option>
+<option value="7 hari" data-days="7" data-price="20000">7 HARI — Rp20.000</option>
+<option value="30 hari" data-days="30" data-price="25000">30 HARI — Rp25.000</option>
+<option value="PERMANEN" data-days="0" data-price="30000">PERMANEN — Rp30.000</option>
+</select></div>
+<div><label>Harga</label><input id="cprice" readonly></div>
+</div>
+<div class="grid">
+<div><label>Mulai</label><input id="cstart" type="datetime-local"></div>
+<div><label>Expired</label><input id="cexp" type="datetime-local" readonly></div>
+</div>
+<label><input id="cenabled" type="checkbox" checked style="width:auto"> Account enabled</label>
+<div id="cmsg" class="msg"></div>
+<div class="toolbar"><button type="submit">🔑 CREATE / SAVE ACCESS</button><button type="button" class="alt" id="closeCustomer">CANCEL</button></div>
+</form></div></div>
+<div id="featureModal" class="modal hidden"><div class="modalbox"><h3 id="fmTitle">ADD FEATURE</h3><form id="featureForm"><input id="fid" type="hidden"><label>Name</label><input id="fname" required><label>Icon</label><input id="ficon" value="🧩"><label>Description</label><textarea id="fdesc"></textarea><div class="grid"><div><label>Sort Order</label><input id="forder" type="number" value="0"></div><div><label><input id="fenabled" type="checkbox" checked style="width:auto"> Active</label></div></div><div id="fmsg" class="msg"></div><div class="toolbar"><button>SAVE/PUBLISH</button><button type="button" class="alt" id="closeFeature">CANCEL</button></div></form></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const SUPABASE_URL="https://rdgtbyayaudumzpxfcax.supabase.co";const SUPABASE_PUBLISHABLE_KEY="sb_publishable_OZOiy7jXy1pcgA-fZfW1SQ_3eRoQaQv";let sb=null,customers=[],features=[];
+const $=id=>document.getElementById(id), configured=()=>SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('PASTE_')&&!SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function isoLocal(v){if(!v)return '';const d=new Date(v);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}function dateFmt(v){return new Date(v).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}
+function status(c){if(!c.enabled)return ['DISABLED','off'];if(c.is_permanent)return ['ACTIVE',''];const now=Date.now(),end=new Date(c.expires_at).getTime();if(end<=now)return ['EXPIRED','exp'];if(end-now<=3*864e5)return ['SOON','soon'];return ['ACTIVE','']}
+async function loadCustomers(){const {data,error}=await sb.from('customer_accounts').select('*').order('expires_at',{ascending:true});if(error){alert(error.message);return}customers=data||[];renderCustomers();updateStats()}
+async function loadFeatures(){const {data,error}=await sb.from('website_features').select('*').order('sort_order',{ascending:true});if(error){alert(error.message);return}features=data||[];renderFeatures();updateStats()}
+function updateStats(){let st=customers.map(status);$('sTotal').textContent=customers.length;$('sActive').textContent=st.filter(x=>x[0]=='ACTIVE'||x[0]=='SOON').length;$('sSoon').textContent=st.filter(x=>x[0]=='SOON').length;$('sExpired').textContent=st.filter(x=>x[0]=='EXPIRED').length;$('sFeatures').textContent=features.length}
+function money(n){return Number(n||0).toLocaleString('id-ID')}
+function packageInfo(){
+  const o=$('cplan').selectedOptions[0];
+  return {plan:o.value,days:Number(o.dataset.days),price:Number(o.dataset.price)};
+}
+function updatePackage(){
+  const p=packageInfo();
+  $('cprice').value='Rp'+money(p.price);
+  const startVal=$('cstart').value;
+  if(!startVal)return;
+  const start=new Date(startVal);
+  if(p.plan==='PERMANEN'){
+    $('cexp').value='2099-12-31T23:59';
+  }else{
+    $('cexp').value=isoLocal(new Date(start.getTime()+p.days*864e5));
+  }
+}
+function renderCustomers(){
+  $('customerRows').innerHTML=customers.length?customers.map(c=>{
+    let s=status(c);
+    return `<tr>
+      <td><b>${esc(c.access_key||'BELUM ADA')}</b></td>
+      <td>${esc(c.username||'-')}</td>
+      <td>${esc(c.plan||'-')}</td>
+      <td>Rp${money(c.price)}</td>
+      <td>${c.is_permanent?'PERMANEN':dateFmt(c.expires_at)}</td>
+      <td><span class="badge ${s[1]}">${s[0]}</span></td>
+      <td class="actions"><button class="alt" onclick="editCustomer('${c.id}')">EDIT</button><button class="danger" onclick="deleteCustomer('${c.id}')">DELETE</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" class="note">Belum ada customer.</td></tr>'
+}
+function renderFeatures(){$('featureRows').innerHTML=features.length?features.map(f=>`<div class="feature"><div class="icon">${esc(f.icon||'🧩')}</div><div class="grow"><b>${esc(f.name)}</b><div class="note">${esc(f.description||'')}</div></div><span class="badge ${f.enabled?'':'off'}">${f.enabled?'ACTIVE':'OFF'}</span><div class="actions"><button class="alt" onclick="editFeature('${f.id}')">EDIT</button><button class="danger" onclick="deleteFeature('${f.id}')">DELETE</button></div></div>`).join(''):'<div class="note">Belum ada feature.</div>'}
+function openCustomer(c){
+  $('cmTitle').textContent=c?'EDIT ACCESS KEY':'CREATE ACCESS KEY';
+  $('cid').value=c?.id||'';
+  $('cuser').value=c?.username||'';
+  $('cname').value=c?.display_name||'';
+  $('ccontact').value=c?.contact||'';
+  $('cplan').value=['1 hari','7 hari','30 hari','PERMANEN'].includes(c?.plan)?c.plan:'1 hari';
+  $('cstart').value=isoLocal(c?.starts_at||new Date());
+  $('cenabled').checked=c?.enabled!==false;
+  $('cmsg').textContent='';
+  updatePackage();
+  $('customerModal').classList.remove('hidden');
+}
+window.editCustomer=id=>openCustomer(customers.find(x=>x.id===id));
+window.deleteCustomer=async id=>{if(!confirm('Hapus account ini?'))return;const {error}=await sb.from('customer_accounts').delete().eq('id',id);if(error)alert(error.message);else loadCustomers()};
+$('cplan').onchange=updatePackage;
+$('cstart').onchange=updatePackage;
+$('customerForm').onsubmit=async e=>{
+  e.preventDefault();
+  $('cmsg').textContent='Menyimpan...';
+  const id=$('cid').value,p=packageInfo(),start=new Date($('cstart').value);
+  if(Number.isNaN(start.getTime())){$('cmsg').textContent='Tanggal mulai tidak valid.';return}
+  const permanent=p.plan==='PERMANEN';
+  const expires=permanent?new Date('2099-12-31T23:59:59+07:00'):new Date(start.getTime()+p.days*864e5);
+  const site=$('siteUrl').value.trim();
+  if(!/^https?:\/\/.+/i.test(site)){$('cmsg').textContent='Isi Website Checker URL yang valid di Dashboard dulu.';return}
+  let payload={
+    username:$('cuser').value.trim()||('customer_'+Date.now()),
+    display_name:$('cname').value.trim(),
+    contact:$('ccontact').value.trim(),
+    plan:p.plan,
+    price:p.price,
+    country:'INDONESIA',
+    website_url:site,
+    starts_at:start.toISOString(),
+    expires_at:expires.toISOString(),
+    is_permanent:permanent,
+    enabled:$('cenabled').checked,
+    updated_at:new Date().toISOString()
+  };
+  if(!id)payload.access_key=makeAccessKey();
+  else{
+    const old=customers.find(x=>x.id===id);
+    if(!old?.access_key)payload.access_key=makeAccessKey();
+  }
+  const q=id?sb.from('customer_accounts').update(payload).eq('id',id):sb.from('customer_accounts').insert(payload);
+  const {data:created,error}=await q.select().single();
+  if(error){$('cmsg').textContent=error.message;return}
+  $('customerModal').classList.add('hidden');
+  await loadCustomers();
+  if(!id&&created)await showCreatedMessage(created.id);
+};
+function makeAccessKey(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out='DANZZGANTENG_KYT_';
+  const a=new Uint8Array(8);crypto.getRandomValues(a);
+  for(let i=0;i<a.length;i++)out+=chars[a[i]%chars.length];
+  return out;
+}
+async function loadSettings(){
+  const {data,error}=await sb.from('site_settings').select('website_url').eq('id',1).maybeSingle();
+  if(error){$('siteMsg').textContent=error.message;return}
+  $('siteUrl').value=data?.website_url||'';
+}
+$('saveSite').onclick=async()=>{
+  const url=$('siteUrl').value.trim();
+  if(!/^https?:\/\/.+/i.test(url)){$('siteMsg').textContent='Masukkan URL valid, contoh https://website-kamu.vercel.app';return}
+  const {error}=await sb.from('site_settings').upsert({id:1,website_url:url,updated_at:new Date().toISOString()});
+  $('siteMsg').textContent=error?error.message:'✅ Website URL tersimpan.';
+};
+function editFeature(id){const f=features.find(x=>x.id===id);$('fmTitle').textContent='EDIT FEATURE';$('fid').value=f.id;$('fname').value=f.name;$('ficon').value=f.icon||'🧩';$('fdesc').value=f.description||'';$('forder').value=f.sort_order||0;$('fenabled').checked=f.enabled!==false;$('fmsg').textContent='';$('featureModal').classList.remove('hidden')}window.editFeature=editFeature;window.deleteFeature=async id=>{if(!confirm('Hapus feature?'))return;const {error}=await sb.from('website_features').delete().eq('id',id);if(error)alert(error.message);else loadFeatures()};
+$('featureForm').onsubmit=async e=>{e.preventDefault();const id=$('fid').value,p={name:$('fname').value.trim(),description:$('fdesc').value.trim(),icon:$('ficon').value.trim()||'🧩',sort_order:Number($('forder').value)||0,enabled:$('fenabled').checked,updated_at:new Date().toISOString()};const {error}=id?await sb.from('website_features').update(p).eq('id',id):await sb.from('website_features').insert(p);if(error){$('fmsg').textContent=error.message;return}$('featureModal').classList.add('hidden');loadFeatures()};
+function dateFmt(v){return new Date(v).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}
+function makeCustomerMessage(c){
+  const key=c.access_key||'';
+  const login=(c.website_url||$('siteUrl').value||'').replace(/\/+$/,'');
+  const start=dateFmt(c.starts_at), exp=c.is_permanent?'PERMANEN':dateFmt(c.expires_at);
+  return `CREATEE AKSES KEYY WEBSITE BERHASILL✅✅
+⚡KEYY WEBSITE: ${key}
+🌐 LOGIN WEB: ${login}
+📦PAKET VIP: ${c.plan}
+📝MULAII: ${start}
+📌EXPIRED: ${exp}
+🇮🇩NEGARA: ${c.country||'INDONESIA'}
+💰HARGAA: ${money(c.price)} RIBU 
+
+
+👑OWNER WEBSITE: @DANZZ ID REALL
+
+⚠️NOTEE: JAGA DOMAIN WEBSITE KALIAN, JANGAN SAMPE TERSEBAR DAN ORANG ORANG TAUU!!! JIKA ORANG LAIN TAU DAN MENGAKSES WEBSITE KALIAN, ADMIN TIDAK BERTANGGUNG JAWAB!!!`;
+}
+async function showCreatedMessage(id){
+  const {data,error}=await sb.from('customer_accounts').select('*').eq('id',id).single();
+  if(error||!data)return;
+  const msg=makeCustomerMessage(data);
+  try{await navigator.clipboard.writeText(msg);alert(msg+"\n\n✅ FORMAT PESAN SUDAH DISALIN");}
+  catch(e){alert(msg);}
+}
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+$('loginForm').onsubmit=async e=>{e.preventDefault();$('loginMsg').textContent='Logging in...';if(!configured()){ $('loginMsg').textContent='Isi URL + Publishable Key dulu.';return}const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){$('loginMsg').textContent=error.message;return}$('login').classList.add('hidden');$('app').classList.remove('hidden');await loadCustomers();await loadFeatures();await loadSettings()};
+$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');['dash','customers','features'].forEach(x=>$(x).classList.add('hidden'));$(b.dataset.tab).classList.remove('hidden')});$('addCustomer').onclick=()=>openCustomer();$('refreshCustomers').onclick=loadCustomers;$('addFeature').onclick=()=>{$('fmTitle').textContent='ADD FEATURE';$('fid').value='';$('fname').value='';$('ficon').value='🧩';$('fdesc').value='';$('forder').value='0';$('fenabled').checked=true;$('featureModal').classList.remove('hidden')};$('refreshFeatures').onclick=loadFeatures;$('closeCustomer').onclick=()=>$('customerModal').classList.add('hidden');$('closeFeature').onclick=()=>$('featureModal').classList.add('hidden');
+async function boot(){if(!configured()){$('apiText').textContent='API NOT CONFIGURED';return}sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);const {data:{session}}=await sb.auth.getSession();if(session){$('login').classList.add('hidden');$('app').classList.remove('hidden');loadCustomers();loadFeatures();loadSettings()}else $('apiText').textContent='API READY • LOGIN REQUIRED'}boot();
+</script></body></html>
